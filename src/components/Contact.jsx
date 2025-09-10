@@ -34,10 +34,10 @@ export default function Contact() {
 		setIsLoading(true);
 
     try {
-      // EmailJS configuration
-      const serviceID = 'service_rscmbmq'; // Replace with your EmailJS service ID
-      const templateID = 'template_kt9uwio'; // Replace with your EmailJS template ID  
-      const userID = '1wxDQcVO0YPJG77_6'; // Replace with your EmailJS user ID
+      // EmailJS configuration - using environment variables for security
+      const serviceID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_rscmbmq';
+      const templateID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_kt9uwio';
+      const userID = import.meta.env.VITE_EMAILJS_USER_ID || '1wxDQcVO0YPJG77_6';
 
 			const templateParams = {
 				from_name: form.name,
