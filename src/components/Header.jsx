@@ -38,13 +38,13 @@ export default function Header({ darkMode, toggleDarkMode }) {
 
         <div className="flex items-center gap-4">
           {/* Enhanced dark mode toggle */}
-          {/* <button
+          <button
             aria-label="Toggle dark mode"
             onClick={toggleDarkMode}
             className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300"
           >
-            {darkMode ? "🌙" : "☀️"}
-          </button> */}
+            {darkMode ? "⏾" : "☀︎"}
+          </button>
 
           {/* Enhanced mobile menu button */}
           <button
