@@ -43,7 +43,7 @@ export default function Header({ darkMode, toggleDarkMode }) {
             onClick={toggleDarkMode}
             className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300"
           >
-            {darkMode ? "⏾" : "☀︎"}
+            {darkMode ? "🌕" : "☀️"}
           </button>
 
           {/* Enhanced mobile menu button */}
