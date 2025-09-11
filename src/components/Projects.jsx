@@ -20,7 +20,7 @@ const projects = [
     title: "Flicksify",
     description: "Media library app for tracking movies, shows, anime, manga, and novels. Users organize collections, track progress, explore genres, and filter/search with advanced options.",
     techStack: ["Python", "Flask", "PostgreSQL", "SQLAlchemy", "Bootstrap", "JavaScript", "Razorpay API", "Font Awesome"],
-    //link: "https://github.com/sahilshaikh", // Replace with actual link
+    link: "https://github.com/sahilshaikhh202/Flicksify",
     image: "https://i.ibb.co/5hH1xM7d/image.png",
   },
 ];
