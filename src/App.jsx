@@ -17,6 +17,10 @@ function App() {
 
   useEffect(() => {
     const roles = roleRefs.current.filter(Boolean);
+    if (!("IntersectionObserver" in window)) {
+      setActiveRoles(new Set(roles.map((_, index) => index)));
+      return undefined;
+    }
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (!entry.isIntersecting) return;
