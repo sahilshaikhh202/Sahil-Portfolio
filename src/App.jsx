@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Contact from "./components/Contact";
@@ -10,6 +11,56 @@ const skills = [["Languages", "TypeScript · JavaScript · Python · Java · SQL
 
 function SectionHeading({ index, children, intro }) { return <div className="section-heading"><span>{index}</span><div><h2>{children}</h2>{intro && <p>{intro}</p>}</div></div>; }
 function App() {
+  const timelineRef = useRef(null);
+  const roleRefs = useRef([]);
+  const [activeRoles, setActiveRoles] = useState(new Set());
+
+  useEffect(() => {
+    const roles = roleRefs.current.filter(Boolean);
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const roleIndex = Number(entry.target.dataset.roleIndex);
+        setActiveRoles(currentRoles => {
+          if (currentRoles.has(roleIndex)) return currentRoles;
+          const nextRoles = new Set(currentRoles);
+          nextRoles.add(roleIndex);
+          return nextRoles;
+        });
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.2, rootMargin: "0px 0px -12% 0px" });
+
+    roles.forEach(role => observer.observe(role));
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const timeline = timelineRef.current;
+    if (!timeline || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+
+    let animationFrameId = null;
+    const updateProgress = () => {
+      animationFrameId = null;
+      const timelineBounds = timeline.getBoundingClientRect();
+      const viewportAnchor = window.innerHeight * 0.55;
+      const progress = Math.min(1, Math.max(0, (viewportAnchor - timelineBounds.top) / timelineBounds.height));
+      timeline.style.setProperty("--timeline-progress", progress);
+    };
+    const scheduleProgressUpdate = () => {
+      if (animationFrameId === null) animationFrameId = requestAnimationFrame(updateProgress);
+    };
+
+    updateProgress();
+    window.addEventListener("scroll", scheduleProgressUpdate, { passive: true });
+    window.addEventListener("resize", scheduleProgressUpdate);
+    return () => {
+      window.removeEventListener("scroll", scheduleProgressUpdate);
+      window.removeEventListener("resize", scheduleProgressUpdate);
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
   return <div className="site-shell"><Header resumeUrl={resumeUrl} /><main>
     <section className="hero" id="top"><div className="hero-grid"><div className="hero-main"><p className="eyebrow">Software engineer / University of Edinburgh</p><h1>Mohd <span className="hero-underline-sahil">Sahil</span> Azad<br /><em>Shaikh</em></h1><p className="hero-role">Software Engineer <i>·</i> MSc Computer Science @ The University of Edinburgh</p><p className="hero-copy">I build production software across backend systems, product interfaces and full-stack products.</p><div className="hero-actions"><a className="button button-dark" href="#experience">View work <span>↓</span></a><a className="button button-line" href={resumeUrl} target="_blank" rel="noreferrer">Resume ↗</a></div><div className="hero-socials"><a href={githubUrl} target="_blank" rel="noreferrer">GitHub ↗</a><a href={linkedinUrl} target="_blank" rel="noreferrer">LinkedIn ↗</a></div></div></div></section>
     <section className="currently section-wrap" id="edinburgh"><SectionHeading index="01" intro="A new academic chapter, grounded in production engineering.">Currently</SectionHeading><div className="currently-card"><span className="currently-kicker">The University of Edinburgh</span><div><h3>MSc Computer Science</h3><p>2026—2027 <i>·</i> Starting September 14, 2026</p></div><p className="currently-copy">Pursuing a one-year MSc while continuing to build software and deepen my understanding of computer science and software engineering.</p></div></section>
@@ -20,8 +71,9 @@ function App() {
           <div><span className="eyebrow">Oct 2025 — Jun 2026 · 9 months</span><h3>Fitpage</h3><p>Mumbai, Maharashtra, India <i>·</i> On-site</p></div>
           <p className="fitpage-summary">Built across IndiaRunning’s consumer, registration and organiser products in a seven-repository production ecosystem.</p>
         </header>
-        <div className="role-timeline">
-          <article className="role-entry role-entry-current">
+        <div className="role-timeline" ref={timelineRef}>
+          <div className="role-timeline-progress" aria-hidden="true" />
+          <article className={`role-entry role-entry-current${activeRoles.has(0) ? " role-entry-active" : ""}`} data-role-index="0" ref={element => { roleRefs.current[0] = element; }}>
             <div className="role-marker" aria-hidden="true"><span /></div>
             <div className="role-content"><div className="role-heading"><div><h4>Associate Software Engineer</h4><p>Apr 2026 — Jun 2026 <i>·</i> Full-time</p></div><span className="role-stage">02</span></div>
             <ul>
@@ -31,7 +83,7 @@ function App() {
             </ul>
             </div>
           </article>
-          <article className="role-entry">
+          <article className={`role-entry${activeRoles.has(1) ? " role-entry-active" : ""}`} data-role-index="1" ref={element => { roleRefs.current[1] = element; }}>
             <div className="role-marker" aria-hidden="true"><span /></div>
             <div className="role-content"><div className="role-heading"><div><h4>Software Developer Intern</h4><p>Oct 2025 — Mar 2026 <i>·</i> Internship</p></div><span className="role-stage">01</span></div>
             <ul>
