@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 const GITHUB_USERNAME = "sahilshaikhh202";
 
@@ -68,6 +69,15 @@ export default function GitHubActivity() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState(null);
+
+  const showTooltip = (day, event) => {
+    const cellBounds = event.currentTarget.getBoundingClientRect();
+    setActiveTooltip({
+      ...day,
+      tooltipX: cellBounds.left + cellBounds.width / 2,
+      tooltipY: cellBounds.top - 10,
+    });
+  };
 
   useEffect(() => {
     let ignore = false;
@@ -173,20 +183,26 @@ export default function GitHubActivity() {
                         className={`github-cell level-${day.level}`}
                         aria-label={tooltipText}
                         title={`${tooltipDate}\n${day.count} contribution${day.count === 1 ? "" : "s"}`}
-                        onMouseEnter={() => setActiveTooltip(day)}
+                        onMouseEnter={(event) => showTooltip(day, event)}
                         onMouseLeave={() => setActiveTooltip((current) => (current?.date === day.date ? null : current))}
-                        onFocus={() => setActiveTooltip(day)}
+                        onFocus={(event) => showTooltip(day, event)}
                         onBlur={() => setActiveTooltip(null)}
-                        onClick={() => setActiveTooltip((current) => (current?.date === day.date ? null : day))}
+                        onClick={(event) => setActiveTooltip((current) => (current?.date === day.date ? null : {
+                          ...day,
+                          tooltipX: event.currentTarget.getBoundingClientRect().left + event.currentTarget.offsetWidth / 2,
+                          tooltipY: event.currentTarget.getBoundingClientRect().top - 10,
+                        }))}
                       >
                         <span className="sr-only">{tooltipText}</span>
                       </button>
 
-                      {isActive && (
-                        <div className="github-tooltip" role="status" aria-live="polite">
+                      {isActive && createPortal(
+                        <div className="github-tooltip" style={{ left: `${activeTooltip.tooltipX}px`, top: `${activeTooltip.tooltipY}px` }} role="status" aria-live="polite">
                           <span>{tooltipDate}</span>
                           <strong>{day.count} contribution{day.count === 1 ? "" : "s"}</strong>
-                        </div>
+                        </div>,
+                        document.body,
+                        `github-tooltip-${day.date}`,
                       )}
                     </div>
                   );
