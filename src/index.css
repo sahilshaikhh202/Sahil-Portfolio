@@ -27,3 +27,5 @@
 @media(prefers-reduced-motion:reduce){.role-entry{opacity:1;transform:none;transition:none}.role-timeline-progress{display:none}.role-marker span,.role-stage{transition:none}.github-cell,.github-tooltip{transition:none}} 
 
 .github-tooltip{position:fixed;left:0;top:0;bottom:auto;transform:translate(-50%,-100%);z-index:100}
+
+.github-cell.level-1,.github-legend-scale .level-1{background:rgba(50,72,255,.16)}
