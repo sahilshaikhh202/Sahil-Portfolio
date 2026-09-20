@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
 const GITHUB_USERNAME = "sahilshaikhh202";
-const FALLBACK_ENDPOINT = `https://api.github.com/users/${GITHUB_USERNAME}/events/public?per_page=100`;
 
 const isValidDate = (value) => value && !Number.isNaN(new Date(`${value}T00:00:00`).getTime());
 
@@ -20,51 +19,6 @@ const formatDate = (dateString) => {
     day: "numeric",
     year: "numeric",
   }).format(date);
-};
-
-const buildContributionCalendarFromEvents = (events) => {
-  const counts = new Map();
-  const endDate = new Date();
-  endDate.setHours(23, 59, 59, 999);
-
-  const startDate = new Date();
-  startDate.setMonth(startDate.getMonth() - 11);
-  startDate.setDate(1);
-  startDate.setHours(0, 0, 0, 0);
-
-  events.forEach((event) => {
-    if (!event?.created_at) return;
-    const eventDate = new Date(event.created_at);
-    if (eventDate < startDate || eventDate > endDate) return;
-    const key = eventDate.toISOString().slice(0, 10);
-    counts.set(key, (counts.get(key) ?? 0) + 1);
-  });
-
-  const calendarStart = new Date(startDate);
-  calendarStart.setDate(calendarStart.getDate() - calendarStart.getDay());
-
-  const weeks = [];
-  const cursor = new Date(calendarStart);
-  const safetyLimit = 60;
-
-  for (let weekIndex = 0; weekIndex < safetyLimit; weekIndex += 1) {
-    const week = [];
-    for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
-      const isoDate = cursor.toISOString().slice(0, 10);
-      const count = counts.get(isoDate) ?? 0;
-      week.push({
-        date: isoDate,
-        count,
-        level: getContributionLevel(count),
-      });
-      cursor.setDate(cursor.getDate() + 1);
-    }
-    weeks.push(week);
-    if (cursor > endDate) break;
-  }
-
-  const totalContributions = [...counts.values()].reduce((sum, amount) => sum + amount, 0);
-  return { totalContributions, weeks };
 };
 
 const normalizeWeeks = (weeks) => {
@@ -106,10 +60,6 @@ const parseGitHubActivityPayload = (payload) => {
     };
   }
 
-  if (Array.isArray(payload)) {
-    return buildContributionCalendarFromEvents(payload);
-  }
-
   return null;
 };
 
@@ -124,18 +74,17 @@ export default function GitHubActivity() {
 
     const fetchActivity = async () => {
       try {
-        const endpoint = import.meta.env.PROD ? "/api/github-activity" : FALLBACK_ENDPOINT;
-        const response = await fetch(endpoint, { cache: "no-store" });
+        const response = await fetch("/api/github-activity", { cache: "no-store" });
 
         if (!response.ok) {
-          throw new Error("GitHub contribution response was not ok");
+          throw new Error("GitHub contribution data is unavailable in this environment.");
         }
 
         const payload = await response.json();
         const parsed = parseGitHubActivityPayload(payload);
 
         if (!parsed || !parsed.weeks?.length) {
-          throw new Error("No contribution calendar data returned");
+          throw new Error("No contribution calendar data returned from GitHub.");
         }
 
         if (!ignore) {
@@ -144,18 +93,8 @@ export default function GitHubActivity() {
         }
       } catch (loadError) {
         if (ignore) return;
-
-        try {
-          const fallbackResponse = await fetch(FALLBACK_ENDPOINT, { cache: "no-store" });
-          if (!fallbackResponse.ok) throw new Error("GitHub events fallback failed");
-          const events = await fallbackResponse.json();
-          const parsedFallback = buildContributionCalendarFromEvents(Array.isArray(events) ? events : []);
-          setCalendar(parsedFallback);
-          setError(false);
-        } catch (fallbackError) {
-          setCalendar({ totalContributions: 0, weeks: [] });
-          setError(true);
-        }
+        setCalendar({ totalContributions: 0, weeks: [] });
+        setError(true);
       } finally {
         if (!ignore) {
           setLoading(false);
@@ -191,7 +130,7 @@ export default function GitHubActivity() {
     [calendar.weeks],
   );
 
-  const totalLabel = loading ? "Loading activity…" : `${calendar.totalContributions.toLocaleString()} contributions`;
+  const totalLabel = loading ? "Loading activity…" : error ? "Contribution data unavailable" : `${calendar.totalContributions.toLocaleString()} contributions`;
 
   return (
     <div className="github-activity">
@@ -205,7 +144,7 @@ export default function GitHubActivity() {
 
       <div className="github-graph-shell" aria-live="polite">
         {error ? (
-          <p className="github-empty-state">Contribution data is temporarily unavailable.</p>
+          <p className="github-empty-state">GitHub contribution data is unavailable currently.</p>
         ) : (
           <div className="github-calendar" style={{"--calendar-weeks": Math.max(calendar.weeks.length, 1)}}>
             <div className="github-months" aria-hidden="true">
