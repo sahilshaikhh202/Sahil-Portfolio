@@ -29,3 +29,7 @@
 .github-tooltip{position:fixed;left:0;top:0;bottom:auto;transform:translate(-50%,-100%);z-index:100}
 
 .github-cell.level-1,.github-legend-scale .level-1{background:rgba(50,72,255,.16)}
+
+.github-activity,.github-graph-shell,.github-calendar,.github-calendar-body{min-width:0}
+.github-calendar-body{overflow-x:visible}
+@media(max-width:760px){.github-calendar{overflow-x:auto;padding-bottom:4px}.github-months{width:650px;min-width:650px}.github-calendar-body{width:690px}.github-grid{width:650px;min-width:650px;max-width:none;overflow:visible}}
