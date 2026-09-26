@@ -33,3 +33,5 @@
 .github-activity,.github-graph-shell,.github-calendar,.github-calendar-body{min-width:0}
 .github-calendar-body{overflow-x:visible}
 @media(max-width:760px){.github-calendar{overflow-x:auto;padding-bottom:4px}.github-months{width:650px;min-width:650px}.github-calendar-body{width:690px}.github-grid{width:650px;min-width:650px;max-width:none;overflow:visible}}
+
+@media(max-width:760px){.menu-toggle{position:relative}.menu-toggle span{position:absolute;left:4px;top:50%;transition:transform .2s ease}.menu-toggle span:first-child{transform:translateY(-3.5px)}.menu-toggle span:last-child{transform:translateY(3.5px)}.menu-toggle.open span:first-child{transform:rotate(45deg)}.menu-toggle.open span:last-child{transform:rotate(-45deg)}}
